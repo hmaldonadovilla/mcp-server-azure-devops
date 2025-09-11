@@ -1,5 +1,5 @@
 {
-  "name": "@tiberriver256/mcp-server-azure-devops",
+  "name": "@hmaldonadovilla/mcp-server-azure-devops",
   "version": "0.1.42",
   "description": "Azure DevOps reference server for the Model Context Protocol (MCP)",
   "main": "dist/index.js",

@@ -982,3 +982,21 @@ The `update_pull_request` tool:
 9. Handles errors and provides meaningful error messages
 
 This implementation provides a comprehensive way to update pull requests in Azure DevOps repositories, supporting all common update scenarios.
+
+## get_pull_request_changes
+
+Retrieves the list of files changed in a pull request along with the latest policy evaluation status.
+
+### Parameters
+
+```json
+{
+  "projectId": "MyProject",
+  "repositoryId": "MyRepo",
+  "pullRequestId": 42
+}
+```
+
+### Response
+
+Returns the changed files for the latest iteration and the status of any policy evaluations.
