@@ -219,3 +219,19 @@ export const UpdatePullRequestSchema = z.object({
     .optional()
     .describe('Additional properties to update on the pull request'),
 });
+
+/**
+ * Schema for getting pull request changes and policy evaluations
+ */
+export const GetPullRequestChangesSchema = z.object({
+  projectId: z
+    .string()
+    .optional()
+    .describe(`The ID or name of the project (Default: ${defaultProject})`),
+  organizationId: z
+    .string()
+    .optional()
+    .describe(`The ID or name of the organization (Default: ${defaultOrg})`),
+  repositoryId: z.string().describe('The ID or name of the repository'),
+  pullRequestId: z.number().describe('The ID of the pull request'),
+});

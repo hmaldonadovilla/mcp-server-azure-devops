@@ -6,6 +6,7 @@ import {
   GetPullRequestCommentsSchema,
   AddPullRequestCommentSchema,
   UpdatePullRequestSchema,
+  GetPullRequestChangesSchema,
 } from './schemas';
 
 /**
@@ -38,5 +39,11 @@ export const pullRequestsTools: ToolDefinition[] = [
     description:
       'Update an existing pull request with new properties, link work items, and manage reviewers',
     inputSchema: zodToJsonSchema(UpdatePullRequestSchema),
+  },
+  {
+    name: 'get_pull_request_changes',
+    description:
+      'Get the files changed in a pull request and the status of policy evaluations',
+    inputSchema: zodToJsonSchema(GetPullRequestChangesSchema),
   },
 ];

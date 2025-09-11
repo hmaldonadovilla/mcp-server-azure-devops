@@ -6,6 +6,9 @@ import {
   ListRepositoriesSchema,
   GetFileContentSchema,
   GetAllRepositoriesTreeSchema,
+  GetRepositoryTreeSchema,
+  CreateBranchSchema,
+  CreateCommitSchema,
 } from './schemas';
 
 /**
@@ -38,5 +41,21 @@ export const repositoriesTools: ToolDefinition[] = [
     description:
       'Displays a hierarchical tree view of files and directories across multiple Azure DevOps repositories within a project, based on their default branches',
     inputSchema: zodToJsonSchema(GetAllRepositoriesTreeSchema),
+  },
+  {
+    name: 'get_repository_tree',
+    description:
+      'Displays a hierarchical tree view of files and directories within a single repository starting from an optional path',
+    inputSchema: zodToJsonSchema(GetRepositoryTreeSchema),
+  },
+  {
+    name: 'create_branch',
+    description: 'Create a new branch from an existing one',
+    inputSchema: zodToJsonSchema(CreateBranchSchema),
+  },
+  {
+    name: 'create_commit',
+    description: 'Create a commit with a set of file changes on a branch',
+    inputSchema: zodToJsonSchema(CreateCommitSchema),
   },
 ];
