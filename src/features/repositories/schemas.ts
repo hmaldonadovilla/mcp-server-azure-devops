@@ -134,3 +134,81 @@ export const GetAllRepositoriesTreeSchema = z.object({
       'File pattern (wildcard characters allowed) to filter files by within each repository',
     ),
 });
+
+/**
+ * Schema for getting a tree for a single repository
+ */
+export const GetRepositoryTreeSchema = z.object({
+  projectId: z
+    .string()
+    .optional()
+    .describe(`The ID or name of the project (Default: ${defaultProject})`),
+  organizationId: z
+    .string()
+    .optional()
+    .describe(`The ID or name of the organization (Default: ${defaultOrg})`),
+  repositoryId: z.string().describe('The ID or name of the repository'),
+  path: z
+    .string()
+    .optional()
+    .default('/')
+    .describe('Path within the repository to start from'),
+  depth: z
+    .number()
+    .int()
+    .min(0)
+    .max(10)
+    .optional()
+    .default(0)
+    .describe('Maximum depth to traverse (0 = unlimited)'),
+});
+
+/**
+ * Schema for creating a new branch
+ */
+export const CreateBranchSchema = z.object({
+  projectId: z
+    .string()
+    .optional()
+    .describe(`The ID or name of the project (Default: ${defaultProject})`),
+  organizationId: z
+    .string()
+    .optional()
+    .describe(`The ID or name of the organization (Default: ${defaultOrg})`),
+  repositoryId: z.string().describe('The ID or name of the repository'),
+  sourceBranch: z.string().describe('Name of the branch to copy from'),
+  newBranch: z.string().describe('Name of the new branch to create'),
+});
+
+/**
+ * Schema for creating a commit with multiple file changes
+ */
+export const CreateCommitSchema = z.object({
+  projectId: z
+    .string()
+    .optional()
+    .describe(`The ID or name of the project (Default: ${defaultProject})`),
+  organizationId: z
+    .string()
+    .optional()
+    .describe(`The ID or name of the organization (Default: ${defaultOrg})`),
+  repositoryId: z.string().describe('The ID or name of the repository'),
+  branchName: z.string().describe('The branch to commit to'),
+  commitMessage: z.string().describe('Commit message'),
+  changes: z
+    .array(
+      z.object({
+        path: z.string().describe('File path within the repository'),
+        originalCode: z
+          .string()
+          .optional()
+          .describe('Original snippet to replace'),
+        newCode: z
+          .string()
+          .optional()
+          .describe('Replacement snippet or new file content'),
+        delete: z.boolean().optional().describe('Delete the file'),
+      }),
+    )
+    .describe('List of file changes'),
+});
