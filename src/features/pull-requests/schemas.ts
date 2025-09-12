@@ -235,3 +235,14 @@ export const GetPullRequestChangesSchema = z.object({
   repositoryId: z.string().describe('The ID or name of the repository'),
   pullRequestId: z.number().describe('The ID of the pull request'),
 });
+
+export const PullRequestFileChangeSchema = z.object({
+  path: z.string().describe('Path of the changed file'),
+  patch: z.string().describe('Unified diff of the file'),
+});
+
+export const GetPullRequestChangesResponseSchema = z.object({
+  changes: z.any(),
+  evaluations: z.array(z.any()),
+  files: z.array(PullRequestFileChangeSchema),
+});
