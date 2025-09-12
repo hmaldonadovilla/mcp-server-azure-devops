@@ -1,5 +1,5 @@
 {
-  "name": "@tiberriver256/mcp-server-azure-devops",
+  "name": "@hmaldonadovilla/mcp-server-azure-devops",
   "version": "0.1.42",
   "description": "Azure DevOps reference server for the Model Context Protocol (MCP)",
   "main": "dist/index.js",
@@ -88,6 +88,7 @@
     "@modelcontextprotocol/sdk": "^1.6.0",
     "axios": "^1.8.3",
     "azure-devops-node-api": "^13.0.0",
+    "diff": "^5.2.0",
     "dotenv": "^16.3.1",
     "minimatch": "^10.0.1",
     "zod": "^3.24.2",
@@ -96,6 +97,7 @@
   "devDependencies": {
     "@commitlint/cli": "^19.8.0",
     "@commitlint/config-conventional": "^19.8.0",
+    "@types/diff": "^5.2.3",
     "@types/jest": "^29.5.0",
     "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^8.27.0",

@@ -6,6 +6,7 @@ import { listPullRequests } from './list-pull-requests';
 import { getPullRequestComments } from './get-pull-request-comments';
 import { addPullRequestComment } from './add-pull-request-comment';
 import { AddPullRequestCommentSchema } from './schemas';
+import { getPullRequestChanges } from './get-pull-request-changes';
 
 // Mock the imported modules
 jest.mock('./create-pull-request', () => ({
@@ -24,6 +25,10 @@ jest.mock('./add-pull-request-comment', () => ({
   addPullRequestComment: jest.fn(),
 }));
 
+jest.mock('./get-pull-request-changes', () => ({
+  getPullRequestChanges: jest.fn(),
+}));
+
 describe('Pull Requests Request Handlers', () => {
   const mockConnection = {} as WebApi;
 
@@ -34,6 +39,7 @@ describe('Pull Requests Request Handlers', () => {
         'list_pull_requests',
         'get_pull_request_comments',
         'add_pull_request_comment',
+        'get_pull_request_changes',
       ];
       validTools.forEach((tool) => {
         const request = {
@@ -214,6 +220,29 @@ describe('Pull Requests Request Handlers', () => {
 
       // Restore the original parse function
       AddPullRequestCommentSchema.parse = originalParse;
+    });
+
+    it('should handle get_pull_request_changes request', async () => {
+      const mockResult = {
+        changes: { changeEntries: [] },
+        evaluations: [],
+        files: [],
+      };
+      (getPullRequestChanges as jest.Mock).mockResolvedValue(mockResult);
+
+      const request = {
+        params: {
+          name: 'get_pull_request_changes',
+          arguments: { repositoryId: 'test-repo', pullRequestId: 1 },
+        },
+        method: 'tools/call',
+      } as CallToolRequest;
+
+      const response = await handlePullRequestsRequest(mockConnection, request);
+      expect(JSON.parse(response.content[0].text as string)).toEqual(
+        mockResult,
+      );
+      expect(getPullRequestChanges).toHaveBeenCalled();
     });
 
     it('should throw error for unknown tool', async () => {

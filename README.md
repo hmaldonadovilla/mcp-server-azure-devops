@@ -1,5 +1,3 @@
-# ℹ️ DISCUSSION: [Microsoft launched an official ADO MCP Server! 🎉🎉🎉](https://github.com/Tiberriver256/mcp-server-azure-devops/discussions/237)
-
 # Azure DevOps MCP Server
 
 A Model Context Protocol (MCP) server implementation for Azure DevOps, allowing AI assistants to interact with Azure DevOps APIs through a standardized protocol.
@@ -49,6 +47,12 @@ The server uses a feature-based architecture where each feature area (like work-
 
 ### Running with NPX
 
+After building the project with `npm run build`, you can run the server directly with:
+
+```bash
+npx @hmaldonadovilla/mcp-server-azure-devops
+```
+
 ### Usage with Claude Desktop/Cursor AI
 
 To integrate with Claude Desktop or Cursor AI, add one of the following configurations to your configuration file.
@@ -62,7 +66,7 @@ Be sure you are logged in to Azure CLI with `az login` then add the following:
   "mcpServers": {
     "azureDevOps": {
       "command": "npx",
-      "args": ["-y", "@tiberriver256/mcp-server-azure-devops"],
+      "args": ["-y", "@hmaldonadovilla/mcp-server-azure-devops"],
       "env": {
         "AZURE_DEVOPS_ORG_URL": "https://dev.azure.com/your-organization",
         "AZURE_DEVOPS_AUTH_METHOD": "azure-identity",
@@ -80,7 +84,7 @@ Be sure you are logged in to Azure CLI with `az login` then add the following:
   "mcpServers": {
     "azureDevOps": {
       "command": "npx",
-      "args": ["-y", "@tiberriver256/mcp-server-azure-devops"],
+      "args": ["-y", "@hmaldonadovilla/mcp-server-azure-devops"],
       "env": {
         "AZURE_DEVOPS_ORG_URL": "https://dev.azure.com/your-organization",
         "AZURE_DEVOPS_AUTH_METHOD": "pat",
@@ -163,6 +167,9 @@ The Azure DevOps MCP server provides a variety of tools for interacting with Azu
 - `get_repository`: Get details of a specific repository
 - `get_repository_details`: Get detailed information about a repository including statistics and refs
 - `get_file_content`: Get content of a file or directory from a repository
+- `get_repository_tree`: List a repository's file tree from any path and depth
+- `create_branch`: Create a new branch from an existing one
+- `create_commit`: Commit multiple file changes to a branch
 
 ### Work Item Tools
 
@@ -196,6 +203,7 @@ The Azure DevOps MCP server provides a variety of tools for interacting with Azu
 - [`add_pull_request_comment`](docs/tools/pull-requests.md#add_pull_request_comment) - Add a comment to a pull request
 - [`get_pull_request_comments`](docs/tools/pull-requests.md#get_pull_request_comments) - Get comments from a pull request
 - [`update_pull_request`](docs/tools/pull-requests.md#update_pull_request) - Update an existing pull request (title, description, status, draft state, reviewers, work items)
+- [`get_pull_request_changes`](docs/tools/pull-requests.md#get_pull_request_changes) - List changes in a pull request and policy evaluation status
 
 For comprehensive documentation on all tools, see the [Tools Documentation](docs/tools/).
 
@@ -205,7 +213,7 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for con
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=tiberriver256/mcp-server-azure-devops&type=Date)](https://www.star-history.com/#tiberriver256/mcp-server-azure-devops&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=hmaldonadovilla/mcp-server-azure-devops&type=Date)](https://www.star-history.com/#hmaldonadovilla/mcp-server-azure-devops&Date)
 
 ## License
 

@@ -521,3 +521,68 @@ console.log(result);
 - `get_repository_details`: Gets detailed info about a single repository
 - `get_repository_tree`: Explores structure within a single repository (more detailed)
 - `get_file_content`: Gets content of a specific file
+- `get_repository_tree`: Explore the tree for a single repository
+- `create_branch`: Create a branch from an existing one
+- `create_commit`: Apply file additions, updates, or deletions in a single commit
+
+## get_repository_tree
+
+Lists files and folders from any point in a repository. You can specify a repository name or path to start from and limit how deep the tree goes.
+
+### Parameters
+
+```json
+{
+  "projectId": "MyProject",
+  "repositoryId": "MyRepo",
+  "path": "src/utils",        // Optional path to start from
+  "depth": 2                   // Optional maximum depth
+}
+```
+
+### Response
+
+Returns a formatted tree showing directories and files starting from the requested location.
+
+## create_branch
+
+Creates a new branch from an existing branch's latest commit.
+
+### Parameters
+
+```json
+{
+  "projectId": "MyProject",
+  "repositoryId": "MyRepo",
+  "sourceBranch": "main",
+  "newBranch": "feature-branch"
+}
+```
+
+### Response
+
+Returns the newly created branch reference.
+
+## create_commit
+
+Commits multiple file changes to a branch, supporting additions, modifications, and deletions.
+
+### Parameters
+
+```json
+{
+  "projectId": "MyProject",
+  "repositoryId": "MyRepo",
+  "branch": "feature-branch",
+  "changes": [
+    { "path": "src/new.ts", "newContent": "console.log('hi')" },
+    { "path": "README.md", "originalContent": "old", "newContent": "new" },
+    { "path": "old.txt", "delete": true }
+  ],
+  "commitMessage": "feat: demo commit"
+}
+```
+
+### Response
+
+Returns the commit ID after applying the changes.
