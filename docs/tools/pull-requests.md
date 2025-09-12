@@ -985,7 +985,7 @@ This implementation provides a comprehensive way to update pull requests in Azur
 
 ## get_pull_request_changes
 
-Retrieves the list of files changed in a pull request along with the latest policy evaluation status.
+Retrieves the list of files changed in a pull request, including unified diff patches for each file and the latest policy evaluation status.
 
 ### Parameters
 
@@ -999,4 +999,17 @@ Retrieves the list of files changed in a pull request along with the latest poli
 
 ### Response
 
-Returns the changed files for the latest iteration and the status of any policy evaluations.
+Returns an object with:
+
+- `changes`: The raw change entries from Azure DevOps for the latest iteration
+- `evaluations`: Policy evaluation records for the pull request
+- `files`: Array of changed files with their unified diffs
+
+Each file entry has the shape:
+
+```json
+{
+  "path": "src/app.ts",
+  "patch": "@@ -1,2 +1,2 @@\n-old\n+new\n"
+}
+```

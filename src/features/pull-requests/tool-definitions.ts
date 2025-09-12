@@ -43,7 +43,7 @@ export const pullRequestsTools: ToolDefinition[] = [
   {
     name: 'get_pull_request_changes',
     description:
-      'Get the files changed in a pull request and the status of policy evaluations',
+      'Get the files changed in a pull request, their unified diffs, and the status of policy evaluations',
     inputSchema: zodToJsonSchema(GetPullRequestChangesSchema),
   },
 ];

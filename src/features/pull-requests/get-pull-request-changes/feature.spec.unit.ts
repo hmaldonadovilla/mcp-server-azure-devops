@@ -2,13 +2,27 @@ import { getPullRequestChanges } from './feature';
 import { AzureDevOpsError } from '../../../shared/errors';
 
 describe('getPullRequestChanges unit', () => {
-  test('should retrieve changes and evaluations', async () => {
+  test('should retrieve changes, evaluations, and patches', async () => {
     const mockConnection: any = {
       getGitApi: jest.fn().mockResolvedValue({
         getPullRequestIterations: jest.fn().mockResolvedValue([{ id: 1 }]),
-        getPullRequestIterationChanges: jest
-          .fn()
-          .mockResolvedValue({ changeEntries: [] }),
+        getPullRequestIterationChanges: jest.fn().mockResolvedValue({
+          changeEntries: [
+            {
+              item: {
+                path: '/file.txt',
+                objectId: 'new',
+                originalObjectId: 'old',
+              },
+            },
+          ],
+        }),
+        getBlob: jest.fn().mockImplementation((_: string, sha: string) => {
+          const content = sha === 'new' ? 'new content\n' : 'old content\n';
+          return Promise.resolve({
+            content: Buffer.from(content).toString('base64'),
+          });
+        }),
       }),
       getPolicyApi: jest.fn().mockResolvedValue({
         getPolicyEvaluations: jest.fn().mockResolvedValue([{ id: '1' }]),
@@ -21,8 +35,18 @@ describe('getPullRequestChanges unit', () => {
       pullRequestId: 1,
     });
 
-    expect(result.changes).toEqual({ changeEntries: [] });
+    expect(result.changes).toEqual({
+      changeEntries: [
+        {
+          item: { path: '/file.txt', objectId: 'new', originalObjectId: 'old' },
+        },
+      ],
+    });
     expect(result.evaluations).toHaveLength(1);
+    expect(result.files).toHaveLength(1);
+    expect(result.files[0].path).toBe('/file.txt');
+    expect(result.files[0].patch).toContain('-old content');
+    expect(result.files[0].patch).toContain('+new content');
   });
 
   test('should throw when no iterations found', async () => {

@@ -1,7 +1,11 @@
 import { WebApi } from 'azure-devops-node-api';
-import { GitPullRequestIterationChanges } from 'azure-devops-node-api/interfaces/GitInterfaces';
+import {
+  GitPullRequestIterationChanges,
+  GitChange,
+} from 'azure-devops-node-api/interfaces/GitInterfaces';
 import { PolicyEvaluationRecord } from 'azure-devops-node-api/interfaces/PolicyInterfaces';
 import { AzureDevOpsError } from '../../../shared/errors';
+import { createTwoFilesPatch } from 'diff';
 
 export interface PullRequestChangesOptions {
   projectId: string;
@@ -12,6 +16,7 @@ export interface PullRequestChangesOptions {
 export interface PullRequestChangesResponse {
   changes: GitPullRequestIterationChanges;
   evaluations: PolicyEvaluationRecord[];
+  files: Array<{ path: string; patch: string }>;
 }
 
 /**
@@ -46,7 +51,37 @@ export async function getPullRequestChanges(
       artifactId,
     );
 
-    return { changes, evaluations };
+    const changeEntries = changes.changeEntries ?? [];
+
+    const getBlobText = async (objId?: string): Promise<string> => {
+      if (!objId) return '';
+      const blob = await gitApi.getBlob(
+        options.repositoryId,
+        objId,
+        options.projectId,
+      );
+      const content = (blob as any).content as string | undefined;
+      return content ? Buffer.from(content, 'base64').toString('utf8') : '';
+    };
+
+    const files = await Promise.all(
+      changeEntries.map(async (entry: GitChange) => {
+        const path = entry.item?.path || entry.originalPath || '';
+        const [oldContent, newContent] = await Promise.all([
+          getBlobText(entry.item?.originalObjectId),
+          getBlobText(entry.item?.objectId),
+        ]);
+        const patch = createTwoFilesPatch(
+          entry.originalPath || path,
+          path,
+          oldContent,
+          newContent,
+        );
+        return { path, patch };
+      }),
+    );
+
+    return { changes, evaluations, files };
   } catch (error) {
     if (error instanceof AzureDevOpsError) {
       throw error;
