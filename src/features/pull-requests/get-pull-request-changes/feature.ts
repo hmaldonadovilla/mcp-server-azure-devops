@@ -55,13 +55,18 @@ export async function getPullRequestChanges(
 
     const getBlobText = async (objId?: string): Promise<string> => {
       if (!objId) return '';
-      const blob = await gitApi.getBlob(
+      const stream = await gitApi.getBlobContent(
         options.repositoryId,
         objId,
         options.projectId,
       );
-      const content = (blob as any).content as string | undefined;
-      return content ? Buffer.from(content, 'base64').toString('utf8') : '';
+
+      const chunks: Uint8Array[] = [];
+      return await new Promise<string>((resolve, reject) => {
+        stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+        stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+        stream.on('error', reject);
+      });
     };
 
     const files = await Promise.all(
