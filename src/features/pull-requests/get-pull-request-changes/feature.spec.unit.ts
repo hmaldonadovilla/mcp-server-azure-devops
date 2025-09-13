@@ -1,5 +1,6 @@
 import { getPullRequestChanges } from './feature';
 import { AzureDevOpsError } from '../../../shared/errors';
+import { Readable } from 'stream';
 
 describe('getPullRequestChanges unit', () => {
   test('should retrieve changes, evaluations, and patches', async () => {
@@ -17,12 +18,15 @@ describe('getPullRequestChanges unit', () => {
             },
           ],
         }),
-        getBlob: jest.fn().mockImplementation((_: string, sha: string) => {
-          const content = sha === 'new' ? 'new content\n' : 'old content\n';
-          return Promise.resolve({
-            content: Buffer.from(content).toString('base64'),
-          });
-        }),
+        getBlobContent: jest
+          .fn()
+          .mockImplementation((_: string, sha: string) => {
+            const content = sha === 'new' ? 'new content\n' : 'old content\n';
+            const stream = new Readable();
+            stream.push(content);
+            stream.push(null);
+            return Promise.resolve(stream);
+          }),
       }),
       getPolicyApi: jest.fn().mockResolvedValue({
         getPolicyEvaluations: jest.fn().mockResolvedValue([{ id: '1' }]),
