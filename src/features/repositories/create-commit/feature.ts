@@ -73,14 +73,6 @@ export async function createCommit(
         );
       }
 
-      if (!newPath) {
-        changes.push({
-          changeType: VersionControlChangeType.Delete,
-          item: { path: targetPath },
-        });
-        continue;
-      }
-
       let originalContent = '';
 
       if (oldPath) {
@@ -99,12 +91,20 @@ export async function createCommit(
         originalContent = stream ? await streamToString(stream) : '';
       }
 
-      const updatedContent = applyPatch(originalContent, patch);
+      const patchedContent = applyPatch(originalContent, patch);
 
-      if (updatedContent === false) {
+      if (patchedContent === false) {
         throw new AzureDevOpsError(
           `Failed to apply diff for ${targetPath}. Please ensure the patch is up to date with the branch head.`,
         );
+      }
+
+      if (!newPath) {
+        changes.push({
+          changeType: VersionControlChangeType.Delete,
+          item: { path: targetPath },
+        });
+        continue;
       }
 
       const changeType = oldPath
@@ -115,7 +115,7 @@ export async function createCommit(
         changeType,
         item: { path: targetPath },
         newContent: {
-          content: updatedContent,
+          content: patchedContent,
           contentType: ItemContentType.RawText,
         },
       });
