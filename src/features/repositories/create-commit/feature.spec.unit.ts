@@ -1,6 +1,7 @@
 import { Readable } from 'stream';
 import { createCommit } from './feature';
 import { AzureDevOpsError } from '../../../shared/errors';
+import { createTwoFilesPatch } from 'diff';
 
 describe('createCommit unit', () => {
   test('should create push with provided changes', async () => {
@@ -12,7 +13,7 @@ describe('createCommit unit', () => {
           .mockResolvedValue({ commit: { commitId: 'base' } }),
         getItemContent: jest
           .fn()
-          .mockResolvedValue(Readable.from(['console.log("hello");'])),
+          .mockResolvedValue(Readable.from(['console.log("hello");\n'])),
         createPush,
       }),
     };
@@ -25,10 +26,17 @@ describe('createCommit unit', () => {
       changes: [
         {
           path: '/file.ts',
-          originalCode: 'console.log("hello");',
-          newCode: 'console.log("world");',
+          patch: createTwoFilesPatch(
+            '/file.ts',
+            '/file.ts',
+            'console.log("hello");\n',
+            'console.log("world");\n',
+          ),
         },
-        { path: '/new.txt', newCode: 'hi' },
+        {
+          path: '/new.txt',
+          patch: createTwoFilesPatch('/dev/null', '/new.txt', '', 'hi\n'),
+        },
       ],
     });
 
@@ -58,8 +66,12 @@ describe('createCommit unit', () => {
         changes: [
           {
             path: '/file.ts',
-            originalCode: 'console.log("hello");',
-            newCode: 'console.log("world");',
+            patch: createTwoFilesPatch(
+              '/file.ts',
+              '/file.ts',
+              'console.log("hello");\n',
+              'console.log("world");\n',
+            ),
           },
         ],
       }),
