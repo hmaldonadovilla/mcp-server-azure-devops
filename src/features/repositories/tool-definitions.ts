@@ -9,6 +9,7 @@ import {
   GetRepositoryTreeSchema,
   CreateBranchSchema,
   CreateCommitSchema,
+  ListCommitsSchema,
 } from './schemas';
 
 /**
@@ -57,5 +58,11 @@ export const repositoriesTools: ToolDefinition[] = [
     name: 'create_commit',
     description: 'Create a commit with a set of file changes on a branch',
     inputSchema: zodToJsonSchema(CreateCommitSchema),
+  },
+  {
+    name: 'list_commits',
+    description:
+      'List recent commits on a branch including file-level diff content for each commit',
+    inputSchema: zodToJsonSchema(ListCommitsSchema),
   },
 ];

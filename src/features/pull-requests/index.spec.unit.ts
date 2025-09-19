@@ -72,6 +72,7 @@ describe('Pull Requests Request Handlers', () => {
             title: 'Test PR',
             sourceRefName: 'refs/heads/feature',
             targetRefName: 'refs/heads/main',
+            tags: ['Tag-One'],
           },
         },
         method: 'tools/call',
@@ -90,6 +91,7 @@ describe('Pull Requests Request Handlers', () => {
           title: 'Test PR',
           sourceRefName: 'refs/heads/feature',
           targetRefName: 'refs/heads/main',
+          tags: ['Tag-One'],
         }),
       );
     });

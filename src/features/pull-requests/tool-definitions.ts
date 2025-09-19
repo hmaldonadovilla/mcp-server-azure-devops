@@ -15,7 +15,8 @@ import {
 export const pullRequestsTools: ToolDefinition[] = [
   {
     name: 'create_pull_request',
-    description: 'Create a new pull request',
+    description:
+      'Create a new pull request, including reviewers, linked work items, and optional tags',
     inputSchema: zodToJsonSchema(CreatePullRequestSchema),
   },
   {
@@ -37,7 +38,7 @@ export const pullRequestsTools: ToolDefinition[] = [
   {
     name: 'update_pull_request',
     description:
-      'Update an existing pull request with new properties, link work items, and manage reviewers',
+      'Update an existing pull request with new properties, manage reviewers and work items, and add or remove tags',
     inputSchema: zodToJsonSchema(UpdatePullRequestSchema),
   },
   {

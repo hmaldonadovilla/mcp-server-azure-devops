@@ -11,6 +11,7 @@ export * from './get-all-repositories-tree';
 export * from './get-repository-tree';
 export * from './create-branch';
 export * from './create-commit';
+export * from './list-commits';
 
 // Export tool definitions
 export * from './tool-definitions';
@@ -33,6 +34,7 @@ import {
   GetRepositoryTreeSchema,
   CreateBranchSchema,
   CreateCommitSchema,
+  ListCommitsSchema,
   getRepository,
   getRepositoryDetails,
   listRepositories,
@@ -41,6 +43,7 @@ import {
   getRepositoryTree,
   createBranch,
   createCommit,
+  listCommits,
   formatRepositoryTree,
 } from './';
 
@@ -60,6 +63,7 @@ export const isRepositoriesRequest: RequestIdentifier = (
     'get_repository_tree',
     'create_branch',
     'create_commit',
+    'list_commits',
   ].includes(toolName);
 };
 
@@ -191,6 +195,16 @@ export const handleRepositoriesRequest: RequestHandler = async (
       });
       return {
         content: [{ type: 'text', text: 'Commit created successfully' }],
+      };
+    }
+    case 'list_commits': {
+      const args = ListCommitsSchema.parse(request.params.arguments);
+      const result = await listCommits(connection, {
+        ...args,
+        projectId: args.projectId ?? defaultProject,
+      });
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
       };
     }
     default:

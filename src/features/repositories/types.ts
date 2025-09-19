@@ -82,13 +82,13 @@ export interface CreateBranchOptions {
  * Description of a single file change for commit creation
  */
 export interface FileChange {
-  path: string;
-  /** Snippet of original code to replace (omit for new files) */
-  originalCode?: string;
-  /** Replacement code or full content for new files */
-  newCode?: string;
-  /** If true, delete the file */
-  delete?: boolean;
+  /**
+   * Optional path hint for the change. If omitted, the path from the diff
+   * header will be used.
+   */
+  path?: string;
+  /** Unified diff patch representing the change */
+  patch: string;
 }
 
 /**
@@ -100,6 +100,45 @@ export interface CreateCommitOptions {
   branchName: string;
   commitMessage: string;
   changes: FileChange[];
+}
+
+/**
+ * Options for listing commits within a repository branch
+ */
+export interface ListCommitsOptions {
+  projectId: string;
+  repositoryId: string;
+  branchName: string;
+  top?: number;
+  skip?: number;
+}
+
+/**
+ * Representation of a commit along with the file diffs it touches
+ */
+export interface CommitWithContent {
+  commitId: string;
+  comment?: string;
+  author?: {
+    name?: string;
+    email?: string;
+    date?: Date;
+  };
+  committer?: {
+    name?: string;
+    email?: string;
+    date?: Date;
+  };
+  url?: string;
+  parents?: string[];
+  files: Array<{ path: string; patch: string }>;
+}
+
+/**
+ * Response for listing commits with their associated content
+ */
+export interface ListCommitsResponse {
+  commits: CommitWithContent[];
 }
 
 /**

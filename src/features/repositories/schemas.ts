@@ -198,17 +198,45 @@ export const CreateCommitSchema = z.object({
   changes: z
     .array(
       z.object({
-        path: z.string().describe('File path within the repository'),
-        originalCode: z
+        path: z
           .string()
           .optional()
-          .describe('Original snippet to replace'),
-        newCode: z
+          .describe(
+            'Optional file path hint; defaults to the diff header path',
+          ),
+        patch: z
           .string()
-          .optional()
-          .describe('Replacement snippet or new file content'),
-        delete: z.boolean().optional().describe('Delete the file'),
+          .describe('Unified diff patch representing the change'),
       }),
     )
-    .describe('List of file changes'),
+    .describe('List of file changes represented as unified diffs'),
+});
+
+/**
+ * Schema for listing commits on a branch
+ */
+export const ListCommitsSchema = z.object({
+  projectId: z
+    .string()
+    .optional()
+    .describe(`The ID or name of the project (Default: ${defaultProject})`),
+  organizationId: z
+    .string()
+    .optional()
+    .describe(`The ID or name of the organization (Default: ${defaultOrg})`),
+  repositoryId: z.string().describe('The ID or name of the repository'),
+  branchName: z.string().describe('Branch name to list commits from'),
+  top: z
+    .number()
+    .int()
+    .min(1)
+    .max(100)
+    .optional()
+    .describe('Maximum number of commits to return (Default: 10)'),
+  skip: z
+    .number()
+    .int()
+    .min(0)
+    .optional()
+    .describe('Number of commits to skip from the newest'),
 });
