@@ -166,51 +166,81 @@ export const GetRepositoryTreeSchema = z.object({
 /**
  * Schema for creating a new branch
  */
-export const CreateBranchSchema = z.object({
-  projectId: z
-    .string()
-    .optional()
-    .describe(`The ID or name of the project (Default: ${defaultProject})`),
-  organizationId: z
-    .string()
-    .optional()
-    .describe(`The ID or name of the organization (Default: ${defaultOrg})`),
-  repositoryId: z.string().describe('The ID or name of the repository'),
-  sourceBranch: z.string().describe('Name of the branch to copy from'),
-  newBranch: z.string().describe('Name of the new branch to create'),
-});
+export const CreateBranchSchema = z
+  .object({
+    projectId: z
+      .string()
+      .optional()
+      .describe(`The ID or name of the project (Default: ${defaultProject})`),
+    organizationId: z
+      .string()
+      .optional()
+      .describe(`The ID or name of the organization (Default: ${defaultOrg})`),
+    repositoryId: z.string().describe('The ID or name of the repository'),
+    sourceBranch: z
+      .string()
+      .describe(
+        'Name of the branch to copy from (without "refs/heads/", e.g., "master")',
+      ),
+    newBranch: z
+      .string()
+      .describe(
+        'Name of the new branch to create (without "refs/heads/", e.g., "feature/my-branch")',
+      ),
+  })
+  .describe(
+    'Create a new branch from an existing branch.\n' +
+      '- Pass plain branch names (no "refs/heads/"). Example: sourceBranch="master", newBranch="codex/test1".\n' +
+      '- When creating pull requests later, use fully-qualified refs (e.g., "refs/heads/codex/test1").',
+  );
 
 /**
  * Schema for creating a commit with multiple file changes
  */
-export const CreateCommitSchema = z.object({
-  projectId: z
-    .string()
-    .optional()
-    .describe(`The ID or name of the project (Default: ${defaultProject})`),
-  organizationId: z
-    .string()
-    .optional()
-    .describe(`The ID or name of the organization (Default: ${defaultOrg})`),
-  repositoryId: z.string().describe('The ID or name of the repository'),
-  branchName: z.string().describe('The branch to commit to'),
-  commitMessage: z.string().describe('Commit message'),
-  changes: z
-    .array(
-      z.object({
-        path: z
-          .string()
-          .optional()
-          .describe(
-            'Optional file path hint; defaults to the diff header path',
-          ),
-        patch: z
-          .string()
-          .describe('Unified diff patch representing the change'),
-      }),
-    )
-    .describe('List of file changes represented as unified diffs'),
-});
+export const CreateCommitSchema = z
+  .object({
+    projectId: z
+      .string()
+      .optional()
+      .describe(`The ID or name of the project (Default: ${defaultProject})`),
+    organizationId: z
+      .string()
+      .optional()
+      .describe(`The ID or name of the organization (Default: ${defaultOrg})`),
+    repositoryId: z.string().describe('The ID or name of the repository'),
+    branchName: z
+      .string()
+      .describe(
+        'The branch to commit to (without "refs/heads/", e.g., "codex/test2-delete-main-py")',
+      ),
+    commitMessage: z.string().describe('Commit message'),
+    changes: z
+      .array(
+        z.object({
+          path: z
+            .string()
+            .optional()
+            .describe(
+              'Optional file path hint; defaults to the diff header path',
+            ),
+          patch: z
+            .string()
+            .describe(
+              'Unified git diff patch. Supports add/modify/delete.\n' +
+                '- Modify: include hunks with @@ headers using paths like "--- a/path" and "+++ b/path".\n' +
+                '- Add: use "/dev/null" -> "b/path" with hunk content.\n' +
+                '- Delete: use minimal form: "diff --git a/path b/path\\ndeleted file mode 100644\\n--- a/path\\n+++ /dev/null\\n" (no hunk required).',
+            ),
+        }),
+      )
+      .describe('List of file changes represented as unified git diffs'),
+  })
+  .describe(
+    'Create a commit on an existing branch using one or more unified git diff patches.\n' +
+      '- Use plain branch names (no "refs/heads/").\n' +
+      '- The optional "path" is only a hint; the diff headers are authoritative.\n' +
+      '- For file deletion, prefer the minimal deleted-file patch shown above.',
+  );
 
 /**
  * Schema for listing commits on a branch

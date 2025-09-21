@@ -565,7 +565,7 @@ Returns the newly created branch reference.
 
 ## create_commit
 
-Commits multiple file changes to a branch, supporting additions, modifications, and deletions.
+Commits multiple file changes to a branch, supporting additions, modifications, and deletions (renames are not currently supported).
 
 ### Parameters
 
@@ -573,15 +573,27 @@ Commits multiple file changes to a branch, supporting additions, modifications, 
 {
   "projectId": "MyProject",
   "repositoryId": "MyRepo",
-  "branch": "feature-branch",
+  "branchName": "feature-branch",
+  "commitMessage": "feat: demo commit",
   "changes": [
-    { "path": "src/new.ts", "newContent": "console.log('hi')" },
-    { "path": "README.md", "originalContent": "old", "newContent": "new" },
-    { "path": "old.txt", "delete": true }
-  ],
-  "commitMessage": "feat: demo commit"
+    {
+      "path": "src/new.ts", // Optional override when the diff header does not reflect the desired path
+      "patch": "diff --git a/src/new.ts b/src/new.ts\n--- /dev/null\n+++ b/src/new.ts\n@@\n+console.log('hi');\n"
+    },
+    {
+      "patch": "diff --git a/README.md b/README.md\n--- a/README.md\n+++ b/README.md\n@@\n-Old content\n+New content\n"
+    },
+    {
+      "patch": "diff --git a/old.txt b/old.txt\n--- a/old.txt\n+++ /dev/null\n@@\n-This file will be deleted\n"
+    }
+  ]
 }
 ```
+
+- `branchName` identifies the branch to update.
+- Each entry in `changes` must be a unified diff (`patch`); `/dev/null` indicates file creation or deletion.
+- Provide `path` only when the diff header cannot be trusted (for example, when generated without `a/` and `b/` prefixes).
+- Diffs must be calculated from the latest branch head to avoid merge conflicts during commit creation.
 
 ### Response
 
