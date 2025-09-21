@@ -37,6 +37,10 @@ export const CreatePullRequestSchema = z.object({
     .array(z.number())
     .optional()
     .describe('List of work item IDs to link to the pull request'),
+  tags: z
+    .array(z.string().trim().min(1))
+    .optional()
+    .describe('List of tags to apply to the pull request'),
   additionalProperties: z
     .record(z.string(), z.any())
     .optional()
@@ -214,6 +218,14 @@ export const UpdatePullRequestSchema = z.object({
     .array(z.string())
     .optional()
     .describe('List of reviewer email addresses or IDs to remove'),
+  addTags: z
+    .array(z.string().trim().min(1))
+    .optional()
+    .describe('List of tags to add to the pull request'),
+  removeTags: z
+    .array(z.string().trim().min(1))
+    .optional()
+    .describe('List of tags to remove from the pull request'),
   additionalProperties: z
     .record(z.string(), z.any())
     .optional()

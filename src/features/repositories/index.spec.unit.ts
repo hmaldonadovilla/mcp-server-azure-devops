@@ -12,6 +12,7 @@ import {
 import { getRepositoryTree } from './get-repository-tree';
 import { createBranch } from './create-branch';
 import { createCommit } from './create-commit';
+import { listCommits } from './list-commits';
 import { GitVersionType } from 'azure-devops-node-api/interfaces/GitInterfaces';
 
 // Mock the imported modules
@@ -48,6 +49,10 @@ jest.mock('./create-commit', () => ({
   createCommit: jest.fn(),
 }));
 
+jest.mock('./list-commits', () => ({
+  listCommits: jest.fn(),
+}));
+
 describe('Repositories Request Handlers', () => {
   const mockConnection = {} as WebApi;
 
@@ -62,6 +67,7 @@ describe('Repositories Request Handlers', () => {
         'get_repository_tree',
         'create_branch',
         'create_commit',
+        'list_commits',
       ];
       validTools.forEach((tool) => {
         const request = {
@@ -310,6 +316,27 @@ describe('Repositories Request Handlers', () => {
       const response = await handleRepositoriesRequest(mockConnection, request);
       expect(response.content[0].text).toContain('Commit created');
       expect(createCommit).toHaveBeenCalled();
+    });
+
+    it('should handle list_commits request', async () => {
+      (listCommits as jest.Mock).mockResolvedValue({ commits: [] });
+
+      const request = {
+        params: {
+          name: 'list_commits',
+          arguments: {
+            repositoryId: 'r',
+            branchName: 'main',
+          },
+        },
+        method: 'tools/call',
+      } as CallToolRequest;
+
+      const response = await handleRepositoriesRequest(mockConnection, request);
+      expect(JSON.parse(response.content[0].text as string)).toEqual({
+        commits: [],
+      });
+      expect(listCommits).toHaveBeenCalled();
     });
 
     it('should throw error for unknown tool', async () => {

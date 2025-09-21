@@ -6,6 +6,7 @@ import {
   VersionControlChangeType,
   ItemContentType,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
+import { applyPatch, parsePatch } from 'diff';
 import { AzureDevOpsError } from '../../../shared/errors';
 import { CreateCommitOptions } from '../types';
 
@@ -40,18 +41,44 @@ export async function createCommit(
     const changes: GitChange[] = [];
 
     for (const file of options.changes) {
-      if (file.delete) {
-        changes.push({
-          changeType: VersionControlChangeType.Delete,
-          item: { path: file.path },
-        });
-        continue;
+      const patches = parsePatch(file.patch);
+      if (patches.length !== 1) {
+        throw new AzureDevOpsError(
+          `Expected a single file diff for change but received ${patches.length}`,
+        );
       }
 
-      if (file.originalCode) {
+      const patch = patches[0];
+
+      const normalizePath = (path?: string | null): string | undefined => {
+        if (!path || path === '/dev/null') {
+          return undefined;
+        }
+        return path.replace(/^a\//, '').replace(/^b\//, '');
+      };
+
+      const oldPath = normalizePath(patch.oldFileName);
+      const newPath = normalizePath(patch.newFileName);
+      const targetPath = file.path ?? newPath ?? oldPath;
+
+      if (!targetPath) {
+        throw new AzureDevOpsError(
+          'Unable to determine target path for change',
+        );
+      }
+
+      if (oldPath && newPath && oldPath !== newPath) {
+        throw new AzureDevOpsError(
+          `Renaming files is not supported (attempted ${oldPath} -> ${newPath})`,
+        );
+      }
+
+      let originalContent = '';
+
+      if (oldPath) {
         const stream = await gitApi.getItemContent(
           options.repositoryId,
-          file.path,
+          oldPath,
           options.projectId,
           undefined,
           undefined,
@@ -61,31 +88,37 @@ export async function createCommit(
           { version: options.branchName, versionType: GitVersionType.Branch },
           true,
         );
-        const original = stream ? await streamToString(stream) : '';
-        if (!original.includes(file.originalCode)) {
-          throw new AzureDevOpsError(
-            `Original code snippet not found in ${file.path}`,
-          );
-        }
-        const updated = original.replace(file.originalCode, file.newCode ?? '');
-        changes.push({
-          changeType: VersionControlChangeType.Edit,
-          item: { path: file.path },
-          newContent: {
-            content: updated,
-            contentType: ItemContentType.RawText,
-          },
-        });
-      } else {
-        changes.push({
-          changeType: VersionControlChangeType.Add,
-          item: { path: file.path },
-          newContent: {
-            content: file.newCode || '',
-            contentType: ItemContentType.RawText,
-          },
-        });
+        originalContent = stream ? await streamToString(stream) : '';
       }
+
+      const patchedContent = applyPatch(originalContent, patch);
+
+      if (patchedContent === false) {
+        throw new AzureDevOpsError(
+          `Failed to apply diff for ${targetPath}. Please ensure the patch is up to date with the branch head.`,
+        );
+      }
+
+      if (!newPath) {
+        changes.push({
+          changeType: VersionControlChangeType.Delete,
+          item: { path: targetPath },
+        });
+        continue;
+      }
+
+      const changeType = oldPath
+        ? VersionControlChangeType.Edit
+        : VersionControlChangeType.Add;
+
+      changes.push({
+        changeType,
+        item: { path: targetPath },
+        newContent: {
+          content: patchedContent,
+          contentType: ItemContentType.RawText,
+        },
+      });
     }
 
     const commit = {
