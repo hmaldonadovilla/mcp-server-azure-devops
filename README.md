@@ -40,7 +40,7 @@ The server uses a feature-based architecture where each feature area (like work-
 - Node.js (v16+)
 - npm or yarn
 - Azure DevOps account with appropriate access
-- Authentication credentials (see [Authentication Guide](docs/authentication.md) for details):
+- Authentication credentials (see [Authentication Guide](https://github.com/hmaldonadovilla/mcp-server-azure-devops/blob/main/docs/authentication.md) for details):
   - Personal Access Token (PAT), or
   - Azure Identity credentials, or
   - Azure CLI login
@@ -96,11 +96,11 @@ Be sure you are logged in to Azure CLI with `az login` then add the following:
 }
 ```
 
-For detailed configuration instructions and more authentication options, see the [Authentication Guide](docs/authentication.md).
+For detailed configuration instructions and more authentication options, see the [Authentication Guide](https://github.com/hmaldonadovilla/mcp-server-azure-devops/blob/main/docs/authentication.md).
 
 ## Authentication Methods
 
-This server supports multiple authentication methods for connecting to Azure DevOps APIs. For detailed setup instructions, configuration examples, and troubleshooting tips, see the [Authentication Guide](docs/authentication.md).
+This server supports multiple authentication methods for connecting to Azure DevOps APIs. For detailed setup instructions, configuration examples, and troubleshooting tips, see the [Authentication Guide](https://github.com/hmaldonadovilla/mcp-server-azure-devops/blob/main/docs/authentication.md).
 
 ### Supported Authentication Methods
 
@@ -108,11 +108,11 @@ This server supports multiple authentication methods for connecting to Azure Dev
 2. **Azure Identity (DefaultAzureCredential)** - Flexible authentication using the Azure Identity SDK
 3. **Azure CLI** - Authentication using your Azure CLI login
 
-Example configuration files for each authentication method are available in the [examples directory](docs/examples/).
+Example configuration files for each authentication method are available in the [examples directory](https://github.com/hmaldonadovilla/mcp-server-azure-devops/tree/main/docs/examples).
 
 ## Environment Variables
 
-For a complete list of environment variables and their descriptions, see the [Authentication Guide](docs/authentication.md#configuration-reference).
+For a complete list of environment variables and their descriptions, see the [Authentication Guide](https://github.com/hmaldonadovilla/mcp-server-azure-devops/blob/main/docs/authentication.md#configuration-reference).
 
 Key environment variables include:
 
@@ -130,7 +130,7 @@ Key environment variables include:
 
 ## Troubleshooting Authentication
 
-For detailed troubleshooting information for each authentication method, see the [Authentication Guide](docs/authentication.md#troubleshooting-authentication-issues).
+For detailed troubleshooting information for each authentication method, see the [Authentication Guide](https://github.com/hmaldonadovilla/mcp-server-azure-devops/blob/main/docs/authentication.md#troubleshooting-authentication-issues).
 
 Common issues include:
 
@@ -141,7 +141,7 @@ Common issues include:
 
 ## Authentication Implementation Details
 
-For technical details about how authentication is implemented in the Azure DevOps MCP server, see the [Authentication Guide](docs/authentication.md) and the source code in the `src/auth` directory.
+For technical details about how authentication is implemented in the Azure DevOps MCP server, see the [Authentication Guide](https://github.com/hmaldonadovilla/mcp-server-azure-devops/blob/main/docs/authentication.md) and the source code in the `src/auth` directory.
 
 ## Available Tools
 
@@ -189,6 +189,11 @@ The Azure DevOps MCP server provides a variety of tools for interacting with Azu
 
 - `list_pipelines`: List pipelines in a project
 - `get_pipeline`: Get details of a specific pipeline
+- `list_pipeline_runs`: List recent runs for a pipeline with optional filters
+- `get_pipeline_run`: Get detailed run information and artifact summaries
+- `download_pipeline_artifact`: Download a single artifact file as text
+- `pipeline_timeline`: Retrieve the stage and job timeline for a run
+- `get_pipeline_log`: Retrieve raw or JSON-formatted log content
 - `trigger_pipeline`: Trigger a pipeline run with customizable parameters
 
 ### Wiki Tools
@@ -198,18 +203,18 @@ The Azure DevOps MCP server provides a variety of tools for interacting with Azu
 
 ### Pull Request Tools
 
-- [`create_pull_request`](docs/tools/pull-requests.md#create_pull_request) - Create a new pull request
-- [`list_pull_requests`](docs/tools/pull-requests.md#list_pull_requests) - List pull requests in a repository
-- [`add_pull_request_comment`](docs/tools/pull-requests.md#add_pull_request_comment) - Add a comment to a pull request
-- [`get_pull_request_comments`](docs/tools/pull-requests.md#get_pull_request_comments) - Get comments from a pull request
-- [`update_pull_request`](docs/tools/pull-requests.md#update_pull_request) - Update an existing pull request (title, description, status, draft state, reviewers, work items)
-- [`get_pull_request_changes`](docs/tools/pull-requests.md#get_pull_request_changes) - List changes in a pull request and policy evaluation status
+- [`create_pull_request`](https://github.com/hmaldonadovilla/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#create_pull_request) - Create a new pull request
+- [`list_pull_requests`](https://github.com/hmaldonadovilla/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#list_pull_requests) - List pull requests in a repository
+- [`add_pull_request_comment`](https://github.com/hmaldonadovilla/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#add_pull_request_comment) - Add a comment to a pull request
+- [`get_pull_request_comments`](https://github.com/hmaldonadovilla/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#get_pull_request_comments) - Get comments from a pull request
+- [`update_pull_request`](https://github.com/hmaldonadovilla/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#update_pull_request) - Update an existing pull request (title, description, status, draft state, reviewers, work items)
+- [`get_pull_request_changes`](https://github.com/hmaldonadovilla/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#get_pull_request_changes) - List changes in a pull request and policy evaluation status
 
-For comprehensive documentation on all tools, see the [Tools Documentation](docs/tools/).
+For comprehensive documentation on all tools, see the [Tools Documentation](https://github.com/hmaldonadovilla/mcp-server-azure-devops/tree/main/docs/tools).
 
 ## Contributing
 
-Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
+Contributions are welcome! Please see [CONTRIBUTING.md](https://github.com/hmaldonadovilla/mcp-server-azure-devops/blob/main/CONTRIBUTING.md) for contribution guidelines.
 
 ## Star History
 

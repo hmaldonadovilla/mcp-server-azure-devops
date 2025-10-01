@@ -74,6 +74,44 @@ export interface GetPipelineRunOptions {
   pipelineId?: number;
 }
 
+export interface PipelineArtifactItem {
+  path: string;
+  itemType: 'file' | 'folder';
+  size?: number;
+}
+
+export interface PipelineRunArtifact {
+  name: string;
+  type?: string;
+  source?: string;
+  downloadUrl?: string;
+  resourceUrl?: string;
+  containerId?: number;
+  rootPath?: string;
+  signedContentUrl?: string;
+  /** Sorted list of files/folders discovered inside the artifact */
+  items?: PipelineArtifactItem[];
+  /** Indicates the artifact has more items than were returned */
+  itemsTruncated?: boolean;
+}
+
+export interface PipelineRunDetails extends Run {
+  artifacts?: PipelineRunArtifact[];
+}
+
+export interface DownloadPipelineArtifactOptions {
+  projectId: string;
+  runId: number;
+  artifactPath: string;
+  pipelineId?: number;
+}
+
+export interface PipelineArtifactContent {
+  artifact: string;
+  path: string;
+  content: string;
+}
+
 /**
  * Options for retrieving the timeline of a pipeline run
  */

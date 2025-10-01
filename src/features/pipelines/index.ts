@@ -6,6 +6,7 @@ export * from './list-pipelines';
 export * from './get-pipeline';
 export * from './list-pipeline-runs';
 export * from './get-pipeline-run';
+export * from './download-pipeline-artifact';
 export * from './pipeline-timeline';
 export * from './get-pipeline-log';
 export * from './trigger-pipeline';
@@ -23,6 +24,7 @@ import { ListPipelinesSchema } from './list-pipelines';
 import { GetPipelineSchema } from './get-pipeline';
 import { ListPipelineRunsSchema } from './list-pipeline-runs';
 import { GetPipelineRunSchema } from './get-pipeline-run';
+import { DownloadPipelineArtifactSchema } from './download-pipeline-artifact';
 import { GetPipelineTimelineSchema } from './pipeline-timeline';
 import { GetPipelineLogSchema } from './get-pipeline-log';
 import { TriggerPipelineSchema } from './trigger-pipeline';
@@ -30,6 +32,7 @@ import { listPipelines } from './list-pipelines';
 import { getPipeline } from './get-pipeline';
 import { listPipelineRuns } from './list-pipeline-runs';
 import { getPipelineRun } from './get-pipeline-run';
+import { downloadPipelineArtifact } from './download-pipeline-artifact';
 import { getPipelineTimeline } from './pipeline-timeline';
 import { getPipelineLog } from './get-pipeline-log';
 import { triggerPipeline } from './trigger-pipeline';
@@ -47,6 +50,7 @@ export const isPipelinesRequest: RequestIdentifier = (
     'get_pipeline',
     'list_pipeline_runs',
     'get_pipeline_run',
+    'download_pipeline_artifact',
     'pipeline_timeline',
     'get_pipeline_log',
     'trigger_pipeline',
@@ -94,6 +98,18 @@ export const handlePipelinesRequest: RequestHandler = async (
     case 'get_pipeline_run': {
       const args = GetPipelineRunSchema.parse(request.params.arguments);
       const result = await getPipelineRun(connection, {
+        ...args,
+        projectId: args.projectId ?? defaultProject,
+      });
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+    case 'download_pipeline_artifact': {
+      const args = DownloadPipelineArtifactSchema.parse(
+        request.params.arguments,
+      );
+      const result = await downloadPipelineArtifact(connection, {
         ...args,
         projectId: args.projectId ?? defaultProject,
       });

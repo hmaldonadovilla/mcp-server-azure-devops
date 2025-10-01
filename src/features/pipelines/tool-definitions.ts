@@ -4,6 +4,7 @@ import { ListPipelinesSchema } from './list-pipelines/schema';
 import { GetPipelineSchema } from './get-pipeline/schema';
 import { ListPipelineRunsSchema } from './list-pipeline-runs/schema';
 import { GetPipelineRunSchema } from './get-pipeline-run/schema';
+import { DownloadPipelineArtifactSchema } from './download-pipeline-artifact/schema';
 import { GetPipelineTimelineSchema } from './pipeline-timeline/schema';
 import { GetPipelineLogSchema } from './get-pipeline-log/schema';
 import { TriggerPipelineSchema } from './trigger-pipeline/schema';
@@ -34,6 +35,13 @@ export const pipelinesTools: ToolDefinition[] = [
     name: 'get_pipeline_run',
     description: 'Get details for a specific pipeline run',
     inputSchema: zodToJsonSchema(GetPipelineRunSchema),
+    mcp_enabled: true,
+  },
+  {
+    name: 'download_pipeline_artifact',
+    description:
+      'Download a file from a pipeline run artifact and return its textual content',
+    inputSchema: zodToJsonSchema(DownloadPipelineArtifactSchema),
     mcp_enabled: true,
   },
   {

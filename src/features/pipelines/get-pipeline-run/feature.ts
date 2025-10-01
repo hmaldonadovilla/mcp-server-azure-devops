@@ -1,5 +1,4 @@
 import { WebApi } from 'azure-devops-node-api';
-import { Build } from 'azure-devops-node-api/interfaces/BuildInterfaces';
 import { TypeInfo } from 'azure-devops-node-api/interfaces/PipelinesInterfaces';
 import {
   AzureDevOpsAuthenticationError,
@@ -7,49 +6,16 @@ import {
   AzureDevOpsResourceNotFoundError,
 } from '../../../shared/errors';
 import { defaultProject } from '../../../utils/environment';
-import { GetPipelineRunOptions, Run } from '../types';
+import { fetchRunArtifacts } from '../artifacts';
+import { coercePipelineId, resolvePipelineId } from '../helpers';
+import { GetPipelineRunOptions, PipelineRunDetails } from '../types';
 
 const API_VERSION = '7.1';
-
-function coercePipelineId(id: unknown): number | undefined {
-  if (typeof id === 'number') {
-    return id;
-  }
-
-  if (typeof id === 'string') {
-    const parsed = Number.parseInt(id, 10);
-    return Number.isNaN(parsed) ? undefined : parsed;
-  }
-
-  return undefined;
-}
-
-async function resolvePipelineId(
-  connection: WebApi,
-  projectId: string,
-  runId: number,
-  providedPipelineId?: number,
-): Promise<number | undefined> {
-  if (typeof providedPipelineId === 'number') {
-    return providedPipelineId;
-  }
-
-  try {
-    const buildApi = await connection.getBuildApi();
-    const build = (await buildApi.getBuild(projectId, runId)) as
-      | Build
-      | undefined;
-    return coercePipelineId(build?.definition?.id);
-  } catch {
-    // Swallow errors here; we'll handle not-found later when the main request fails
-    return undefined;
-  }
-}
 
 export async function getPipelineRun(
   connection: WebApi,
   options: GetPipelineRunOptions,
-): Promise<Run> {
+): Promise<PipelineRunDetails> {
   try {
     const pipelinesApi = await connection.getPipelinesApi();
     const projectId = options.projectId ?? defaultProject;
@@ -87,11 +53,11 @@ export async function getPipelineRun(
 
     let response: {
       statusCode: number;
-      result: Run | null;
+      result: PipelineRunDetails | null;
     } | null = null;
 
     for (const url of urlsToTry) {
-      const attempt = await pipelinesApi.rest.get<Run | null>(
+      const attempt = await pipelinesApi.rest.get<PipelineRunDetails | null>(
         url.toString(),
         requestOptions,
       );
@@ -112,13 +78,20 @@ export async function getPipelineRun(
       response.result,
       TypeInfo.Run,
       false,
-    ) as Run as Run;
+    ) as PipelineRunDetails;
 
     if (!run) {
       throw new AzureDevOpsResourceNotFoundError(
         `Pipeline run ${runId} not found in project ${projectId}`,
       );
     }
+
+    const artifacts = await fetchRunArtifacts(
+      connection,
+      projectId,
+      runId,
+      resolvedPipelineId,
+    );
 
     if (typeof options.pipelineId === 'number') {
       const runPipelineId = coercePipelineId(run.pipeline?.id);
@@ -129,7 +102,7 @@ export async function getPipelineRun(
       }
     }
 
-    return run;
+    return artifacts.length > 0 ? { ...run, artifacts } : run;
   } catch (error) {
     if (error instanceof AzureDevOpsError) {
       throw error;
