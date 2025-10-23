@@ -226,20 +226,54 @@ export const CreateCommitSchema = z
           patch: z
             .string()
             .describe(
-              'Unified git diff patch. Supports add/modify/delete.\n' +
-                '- Modify: include hunks with @@ headers using paths like "--- a/path" and "+++ b/path".\n' +
-                '- Add: use "/dev/null" -> "b/path" with hunk content.\n' +
-                '- Delete: use minimal form: "diff --git a/path b/path\\ndeleted file mode 100644\\n--- a/path\\n+++ /dev/null\\n" (no hunk required).',
+              [
+                'Unified git diff for a single file.',
+                'Include `diff --git`, `--- a/...`, `+++ b/...`, and hunk headers with explicit ranges (e.g., `@@ -4,7 +4,7 @@`).',
+                'Use `/dev/null` together with `---` or `+++` when adding or deleting files.',
+                '',
+                'Example modify patch:',
+                '```diff',
+                'diff --git a/charts/bcs-mcp-server/templates/service-api.yaml b/charts/bcs-mcp-server/templates/service-api.yaml',
+                '--- a/charts/bcs-mcp-server/templates/service-api.yaml',
+                '+++ b/charts/bcs-mcp-server/templates/service-api.yaml',
+                '@@ -4,7 +4,7 @@ spec:',
+                ' spec:',
+                '   type: {{ .Values.service.type }}',
+                '   ports:',
+                '-    - port: 8080',
+                '+    - port: 9090',
+                '     targetPort: deployment-port',
+                '     protocol: TCP',
+                '     name: http',
+              ].join('\n'),
             ),
         }),
       )
       .describe('List of file changes represented as unified git diffs'),
   })
   .describe(
-    'Create a commit on an existing branch using one or more unified git diff patches.\n' +
-      '- Use plain branch names (no "refs/heads/").\n' +
-      '- The optional "path" is only a hint; the diff headers are authoritative.\n' +
-      '- For file deletion, prefer the minimal deleted-file patch shown above.',
+    [
+      'Create a commit on an existing branch using one or more unified git diff patches.',
+      '- Provide plain branch names (no "refs/heads/").',
+      '- Ensure each patch includes explicit hunk ranges (e.g., `@@ -4,7 +4,7 @@`).',
+      '- Optional `path` is only a hint; diff headers control the actual file being updated.',
+      '- For deletions, use the minimal deleted-file patch (`--- a/file`, `+++ /dev/null`).',
+      '',
+      'Example input:',
+      '```json',
+      '{',
+      '  "projectId": "GHQ_B2B_Delta",',
+      '  "repositoryId": "bees-microservices",',
+      '  "branchName": "feature/runtime-hardening",',
+      '  "commitMessage": "chore: align service ports",',
+      '  "changes": [',
+      '    {',
+      '      "patch": "diff --git a/charts/bcs-mcp-server/templates/service-api.yaml b/charts/bcs-mcp-server/templates/service-api.yaml\n--- a/charts/bcs-mcp-server/templates/service-api.yaml\n+++ b/charts/bcs-mcp-server/templates/service-api.yaml\n@@ -4,7 +4,7 @@ spec:\n spec:\n   type: {{ .Values.service.type }}\n   ports:\n-    - port: 8080\n+    - port: 9090\n       targetPort: deployment-port\n       protocol: TCP\n       name: http\n"',
+      '    }',
+      '  ]',
+      '}',
+      '```',
+    ].join('\n'),
   );
 
 /**
