@@ -169,7 +169,7 @@ The Azure DevOps MCP server provides a variety of tools for interacting with Azu
 - `get_file_content`: Get content of a file or directory from a repository
 - `get_repository_tree`: List a repository's file tree from any path and depth
 - `create_branch`: Create a new branch from an existing one
-- `create_commit`: Commit multiple file changes to a branch
+- `create_commit`: Commit multiple file changes to a branch using unified diffs or search/replace instructions
 
 ### Work Item Tools
 

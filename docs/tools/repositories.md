@@ -523,7 +523,7 @@ console.log(result);
 - `get_file_content`: Gets content of a specific file
 - `get_repository_tree`: Explore the tree for a single repository
 - `create_branch`: Create a branch from an existing one
-- `create_commit`: Apply file additions, updates, or deletions in a single commit
+- `create_commit`: Apply file additions, updates, or deletions in a single commit (supports unified diffs or search/replace instructions)
 
 ## get_repository_tree
 
@@ -567,6 +567,8 @@ Returns the newly created branch reference.
 
 Commits multiple file changes to a branch, supporting additions, modifications, and deletions (renames are not currently supported).
 
+You can describe each change either as a traditional unified diff (`patch`) **or** with a simpler search/replace format (`path`, `search`, and `replace`). The server automatically fetches the latest file content, performs the replacement, and builds the diff for you.
+
 ### Parameters
 
 ```json
@@ -585,15 +587,22 @@ Commits multiple file changes to a branch, supporting additions, modifications, 
     },
     {
       "patch": "diff --git a/old.txt b/old.txt\n--- a/old.txt\n+++ /dev/null\n@@\n-This file will be deleted\n"
+    },
+    {
+      "path": "src/index.ts", // Required when using search/replace
+      "search": "return axios.post(apiUrl, payload, requestConfig);",
+      "replace": "return axios.post(apiUrl, payload, requestConfig).then(res => handleResponse(res));"
     }
   ]
 }
 ```
 
 - `branchName` identifies the branch to update.
-- Each entry in `changes` must be a unified diff (`patch`); `/dev/null` indicates file creation or deletion.
-- Provide `path` only when the diff header cannot be trusted (for example, when generated without `a/` and `b/` prefixes).
-- Diffs must be calculated from the latest branch head to avoid merge conflicts during commit creation.
+- Provide `path` only when the diff header cannot be trusted (for example, when generated without `a/` and `b/` prefixes). For search/replace changes, `path` is required so the server can load the file.
+- Each entry in `changes` can be either a unified diff (`patch`) or a search/replace pair (`search` and `replace`). `/dev/null` still indicates file creation or deletion for diff-based changes.
+- Instead of crafting diffs manually you can supply `search` and `replace` text. The server confirms the search string exists in the latest version of the file, applies the replacement, and generates the diff automatically.
+- Diffs (including ones generated from search/replace) must be based on the latest branch head to avoid merge conflicts during commit creation.
+- If the search text cannot be found, the request fails so you can review upstream modifications before retrying.
 
 ### Response
 
