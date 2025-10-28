@@ -6,7 +6,7 @@ import {
   VersionControlChangeType,
   ItemContentType,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
-import { applyPatch, parsePatch } from 'diff';
+import { applyPatch, parsePatch, createTwoFilesPatch } from 'diff';
 import { AzureDevOpsError } from '../../../shared/errors';
 import { CreateCommitOptions } from '../types';
 
@@ -41,7 +41,68 @@ export async function createCommit(
     const changes: GitChange[] = [];
 
     for (const file of options.changes) {
-      const patches = parsePatch(file.patch);
+      // Handle search/replace format by generating a patch
+      let patchString = file.patch;
+
+      if (
+        !patchString &&
+        file.search !== undefined &&
+        file.replace !== undefined
+      ) {
+        if (!file.path) {
+          throw new AzureDevOpsError(
+            'path is required when using search/replace format',
+          );
+        }
+
+        // Fetch current file content
+        let currentContent = '';
+        try {
+          const stream = await gitApi.getItemContent(
+            options.repositoryId,
+            file.path,
+            options.projectId,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            false,
+            { version: options.branchName, versionType: GitVersionType.Branch },
+            true,
+          );
+          currentContent = stream ? await streamToString(stream) : '';
+        } catch {
+          // File might not exist (new file scenario) - treat as empty
+          currentContent = '';
+        }
+
+        // Perform the replacement
+        if (!currentContent.includes(file.search)) {
+          throw new AzureDevOpsError(
+            `Search string not found in ${file.path}. The file may have been modified since you last read it.`,
+          );
+        }
+
+        const newContent = currentContent.replace(file.search, file.replace);
+
+        // Generate proper unified diff
+        patchString = createTwoFilesPatch(
+          file.path,
+          file.path,
+          currentContent,
+          newContent,
+          undefined,
+          undefined,
+        );
+      }
+
+      if (!patchString) {
+        throw new AzureDevOpsError(
+          'Either patch or both search and replace must be provided for each change',
+        );
+      }
+
+      const patches = parsePatch(patchString);
       if (patches.length !== 1) {
         throw new AzureDevOpsError(
           `Expected a single file diff for change but received ${patches.length}`,

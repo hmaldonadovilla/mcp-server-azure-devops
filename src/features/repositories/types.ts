@@ -88,7 +88,17 @@ export interface FileChange {
    */
   path?: string;
   /** Unified diff patch representing the change */
-  patch: string;
+  patch?: string;
+  /**
+   * Alternative to patch: exact string to search for in the file.
+   * Must be used together with 'replace'. The server will generate the diff.
+   */
+  search?: string;
+  /**
+   * Alternative to patch: exact string to replace 'search' with.
+   * Must be used together with 'search'. The server will generate the diff.
+   */
+  replace?: string;
 }
 
 /**

@@ -216,77 +216,104 @@ export const CreateCommitSchema = z
     commitMessage: z.string().describe('Commit message'),
     changes: z
       .array(
-        z.object({
-          path: z
-            .string()
-            .optional()
-            .describe(
-              'Optional file path hint; defaults to the diff header path',
-            ),
-          patch: z
-            .string()
-            .describe(
-              [
-                'Unified git diff for a single file.',
-                'MUST include `diff --git`, `--- a/...`, `+++ b/...`, and complete hunk headers.',
-                'CRITICAL: Every hunk header must have line numbers in format: @@ -oldStart,oldLines +newStart,newLines @@',
-                'Do NOT use @@ without the line range numbers - this will cause parsing failures.',
-                'Include 3-5 context lines before and after changes for proper patch application.',
-                'Use `/dev/null` with `---` for new files, or with `+++` for deleted files.',
-                '',
-                'Example modify patch:',
-                '```diff',
-                'diff --git a/charts/bcs-mcp-server/templates/service-api.yaml b/charts/bcs-mcp-server/templates/service-api.yaml',
-                '--- a/charts/bcs-mcp-server/templates/service-api.yaml',
-                '+++ b/charts/bcs-mcp-server/templates/service-api.yaml',
-                '@@ -4,7 +4,7 @@ spec:',
-                ' spec:',
-                '   type: {{ .Values.service.type }}',
-                '   ports:',
-                '-    - port: 8080',
-                '+    - port: 9090',
-                '     targetPort: deployment-port',
-                '     protocol: TCP',
-                '     name: http',
-                '```',
-              ].join('\n'),
-            ),
-        }),
+        z
+          .object({
+            path: z
+              .string()
+              .optional()
+              .describe(
+                'File path. Optional for patch format (uses diff header), REQUIRED for search/replace format',
+              ),
+            patch: z
+              .string()
+              .optional()
+              .describe(
+                [
+                  'Unified git diff for a single file.',
+                  'MUST include `diff --git`, `--- a/...`, `+++ b/...`, and complete hunk headers.',
+                  'CRITICAL: Every hunk header must have line numbers in format: @@ -oldStart,oldLines +newStart,newLines @@',
+                  'Do NOT use @@ without the line range numbers - this will cause parsing failures.',
+                  'Include 3-5 context lines before and after changes for proper patch application.',
+                  'Use `/dev/null` with `---` for new files, or with `+++` for deleted files.',
+                  '',
+                  'Example modify patch:',
+                  '```diff',
+                  'diff --git a/charts/bcs-mcp-server/templates/service-api.yaml b/charts/bcs-mcp-server/templates/service-api.yaml',
+                  '--- a/charts/bcs-mcp-server/templates/service-api.yaml',
+                  '+++ b/charts/bcs-mcp-server/templates/service-api.yaml',
+                  '@@ -4,7 +4,7 @@ spec:',
+                  ' spec:',
+                  '   type: {{ .Values.service.type }}',
+                  '   ports:',
+                  '-    - port: 8080',
+                  '+    - port: 9090',
+                  '     targetPort: deployment-port',
+                  '     protocol: TCP',
+                  '     name: http',
+                  '```',
+                ].join('\n'),
+              ),
+            search: z
+              .string()
+              .optional()
+              .describe(
+                [
+                  'Alternative to patch: Exact text to search for in the file.',
+                  'Must be used with "replace" and "path" fields.',
+                  'The server will fetch the file, perform the replacement, and generate the patch automatically.',
+                  'This is MUCH EASIER than creating unified diffs manually - no line counting needed!',
+                  '',
+                  'Example:',
+                  '"search": "return axios.post(apiUrl, payload, requestConfig);"',
+                  '"replace": "return axios.post(apiUrl, payload, requestConfig).then(r => { /* process */ return r; });"',
+                ].join('\n'),
+              ),
+            replace: z
+              .string()
+              .optional()
+              .describe(
+                'Alternative to patch: Exact text to replace the "search" string with. Must be used together with "search" and "path".',
+              ),
+          })
+          .refine(
+            (data) => {
+              const hasPatch = !!data.patch;
+              const hasSearchReplace = !!data.search && !!data.replace;
+              return hasPatch || hasSearchReplace;
+            },
+            {
+              message:
+                'Either "patch" or both "search" and "replace" must be provided',
+            },
+          ),
       )
-      .describe('List of file changes represented as unified git diffs'),
+      .describe(
+        'List of file changes as either unified git diffs OR search/replace pairs',
+      ),
   })
   .describe(
     [
-      'Create a commit on an existing branch using one or more unified git diff patches.',
+      'Create a commit on an existing branch using file changes.',
       '- Provide plain branch names (no "refs/heads/").',
-      '- Each patch MUST be a complete, valid unified diff with ALL hunk headers in the format: @@ -oldStart,oldLines +newStart,newLines @@',
-      '- CRITICAL: Every @@ marker MUST include the line numbers. Do NOT use @@ without line ranges.',
-      '- Each hunk should include sufficient context lines (typically 3-5 lines before and after changes).',
-      '- Use a single continuous hunk per file when possible to avoid coordination issues.',
-      '- Optional `path` field is only a hint; the diff headers (--- a/... and +++ b/...) control the actual file path.',
-      '- For deletions, use: `--- a/filepath` and `+++ /dev/null`',
-      '- For additions, use: `--- /dev/null` and `+++ b/filepath`',
       '',
-      'Example input:',
+      '**RECOMMENDED: Use search/replace format (easier, no line counting needed!)**',
+      '',
+      'Option 1 - Search/Replace (Easiest):',
       '```json',
       '{',
-      '  "projectId": "GHQ_B2B_Delta",',
-      '  "repositoryId": "bees-microservices",',
-      '  "branchName": "feature/runtime-hardening",',
-      '  "commitMessage": "chore: align service ports",',
-      '  "changes": [',
-      '    {',
-      '      "patch": "diff --git a/charts/bcs-mcp-server/templates/service-api.yaml b/charts/bcs-mcp-server/templates/service-api.yaml\\n--- a/charts/bcs-mcp-server/templates/service-api.yaml\\n+++ b/charts/bcs-mcp-server/templates/service-api.yaml\\n@@ -4,7 +4,7 @@ spec:\\n spec:\\n   type: {{ .Values.service.type }}\\n   ports:\\n-    - port: 8080\\n+    - port: 9090\\n       targetPort: deployment-port\\n       protocol: TCP\\n       name: http\\n"',
-      '    }',
-      '  ]',
+      '  "changes": [{',
+      '    "path": "src/file.ts",',
+      '    "search": "old code here",',
+      '    "replace": "new code here"',
+      '  }]',
       '}',
       '```',
       '',
-      'COMMON MISTAKES TO AVOID:',
-      '- ❌ Using @@ without line numbers: "@@ ... @@"',
-      '- ❌ Multiple hunks without proper headers for each hunk',
-      '- ❌ Missing context lines around changes',
-      '- ✅ Always use: "@@ -startLine,lineCount +startLine,lineCount @@"',
+      'Option 2 - Unified Diff (Advanced):',
+      '- Requires complete hunk headers: @@ -oldStart,oldLines +newStart,newLines @@',
+      '- Include 3-5 context lines before/after changes',
+      '- For deletions: --- a/file, +++ /dev/null',
+      '- For additions: --- /dev/null, +++ b/file',
     ].join('\n'),
   );
 
