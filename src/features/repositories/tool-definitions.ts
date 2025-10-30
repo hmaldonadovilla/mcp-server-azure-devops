@@ -59,6 +59,8 @@ export const repositoriesTools: ToolDefinition[] = [
     description: [
       'Create a commit on an existing branch using file changes.',
       '- Provide plain branch names (no "refs/heads/").',
+      '- ⚠️ Each file path may appear only once per commit request—combine all edits to a file into a single change entry.',
+      '- Prefer multiple commits when you have sparse or unrelated edits; smaller focused commits keep review context clear.',
       '',
       '🎯 RECOMMENDED: Use the SEARCH/REPLACE format (much easier, no line counting!).',
       '',

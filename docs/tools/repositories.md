@@ -567,7 +567,8 @@ Returns the newly created branch reference.
 
 Commits multiple file changes to a branch, supporting additions, modifications, and deletions (renames are not currently supported).
 
-You can describe each change either as a traditional unified diff (`patch`) **or** with a simpler search/replace format (`path`, `search`, and `replace`). The server automatically fetches the latest file content, performs the replacement, and builds the diff for you.
+- ⚠️ Azure DevOps accepts only one change entry per file path in a commit request. Combine all edits to the same file into a single change object before calling this tool.
+- For sparse or unrelated edits within the same file, prefer splitting work into multiple commits so each request stays focused.
 
 ### Parameters
 
