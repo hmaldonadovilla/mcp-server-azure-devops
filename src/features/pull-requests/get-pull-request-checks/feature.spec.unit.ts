@@ -55,13 +55,20 @@ describe('getPullRequestChecks', () => {
       },
     ];
 
+    const gitApi = {
+      getPullRequestStatuses: jest.fn().mockResolvedValue(statusRecords),
+    };
+    const policyApi = {
+      getPolicyEvaluations: jest.fn().mockResolvedValue(evaluationRecords),
+    };
+    const getProject = jest
+      .fn()
+      .mockResolvedValue({ id: 'project-guid', name: 'project' });
+
     const mockConnection: any = {
-      getGitApi: jest.fn().mockResolvedValue({
-        getPullRequestStatuses: jest.fn().mockResolvedValue(statusRecords),
-      }),
-      getPolicyApi: jest.fn().mockResolvedValue({
-        getPolicyEvaluations: jest.fn().mockResolvedValue(evaluationRecords),
-      }),
+      getGitApi: jest.fn().mockResolvedValue(gitApi),
+      getPolicyApi: jest.fn().mockResolvedValue(policyApi),
+      getCoreApi: jest.fn().mockResolvedValue({ getProject }),
     };
 
     const result = await getPullRequestChecks(mockConnection, {
@@ -82,6 +89,17 @@ describe('getPullRequestChecks', () => {
     expect(result.policyEvaluations[0].pipeline?.definitionId).toBe(987);
     expect(result.policyEvaluations[0].pipeline?.buildId).toBe(456);
     expect(result.policyEvaluations[0].targetUrl).toContain('buildId=456');
+
+    expect(getProject).toHaveBeenCalledWith('project');
+    expect(gitApi.getPullRequestStatuses).toHaveBeenCalledWith(
+      'repo',
+      42,
+      'project-guid',
+    );
+    expect(policyApi.getPolicyEvaluations).toHaveBeenCalledWith(
+      'project-guid',
+      'vstfs:///CodeReview/CodeReviewId/project-guid/42',
+    );
   });
 
   it('re-throws Azure DevOps errors', async () => {
@@ -89,6 +107,9 @@ describe('getPullRequestChecks', () => {
     const mockConnection: any = {
       getGitApi: jest.fn().mockRejectedValue(azureError),
       getPolicyApi: jest.fn(),
+      getCoreApi: jest.fn().mockResolvedValue({
+        getProject: jest.fn().mockResolvedValue({ id: 'project-guid' }),
+      }),
     };
 
     await expect(
@@ -104,6 +125,9 @@ describe('getPullRequestChecks', () => {
     const mockConnection: any = {
       getGitApi: jest.fn().mockRejectedValue(new Error('boom')),
       getPolicyApi: jest.fn(),
+      getCoreApi: jest.fn().mockResolvedValue({
+        getProject: jest.fn().mockResolvedValue({ id: 'project-guid' }),
+      }),
     };
 
     await expect(
@@ -113,5 +137,30 @@ describe('getPullRequestChecks', () => {
         pullRequestId: 1,
       }),
     ).rejects.toThrow('Failed to get pull request checks: boom');
+  });
+
+  it('uses the provided project GUID without fetching project metadata', async () => {
+    const mockConnection: any = {
+      getGitApi: jest.fn().mockResolvedValue({
+        getPullRequestStatuses: jest.fn().mockResolvedValue([]),
+      }),
+      getPolicyApi: jest.fn().mockResolvedValue({
+        getPolicyEvaluations: jest.fn().mockResolvedValue([]),
+      }),
+      getCoreApi: jest.fn(() => {
+        throw new Error('should not fetch project');
+      }),
+    };
+
+    await expect(
+      getPullRequestChecks(mockConnection, {
+        projectId: '12345678-1234-1234-1234-1234567890ab',
+        repositoryId: 'repo',
+        pullRequestId: 1,
+      }),
+    ).resolves.toEqual({ statuses: [], policyEvaluations: [] });
+
+    expect(mockConnection.getGitApi).toHaveBeenCalled();
+    expect(mockConnection.getPolicyApi).toHaveBeenCalled();
   });
 });

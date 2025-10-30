@@ -7,7 +7,10 @@ import {
   PolicyEvaluationRecord,
   PolicyEvaluationStatus,
 } from 'azure-devops-node-api/interfaces/PolicyInterfaces';
-import { AzureDevOpsError } from '../../../shared/errors';
+import {
+  AzureDevOpsError,
+  AzureDevOpsResourceNotFoundError,
+} from '../../../shared/errors';
 
 export interface PullRequestChecksOptions {
   projectId: string;
@@ -68,18 +71,21 @@ export async function getPullRequestChecks(
   options: PullRequestChecksOptions,
 ): Promise<PullRequestChecksResult> {
   try {
-    const gitApi = await connection.getGitApi();
-    const policyApi = await connection.getPolicyApi();
+    const [gitApi, policyApi, projectId] = await Promise.all([
+      connection.getGitApi(),
+      connection.getPolicyApi(),
+      resolveProjectId(connection, options.projectId),
+    ]);
 
     const [statusRecords, evaluationRecords] = await Promise.all([
       gitApi.getPullRequestStatuses(
         options.repositoryId,
         options.pullRequestId,
-        options.projectId,
+        projectId,
       ),
       policyApi.getPolicyEvaluations(
-        options.projectId,
-        buildPolicyArtifactId(options.projectId, options.pullRequestId),
+        projectId,
+        buildPolicyArtifactId(projectId, options.pullRequestId),
       ),
     ]);
 
@@ -101,6 +107,29 @@ export async function getPullRequestChecks(
 
 const buildPolicyArtifactId = (projectId: string, pullRequestId: number) =>
   `vstfs:///CodeReview/CodeReviewId/${projectId}/${pullRequestId}`;
+
+const projectIdGuidPattern =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const resolveProjectId = async (
+  connection: WebApi,
+  projectIdOrName: string,
+): Promise<string> => {
+  if (projectIdGuidPattern.test(projectIdOrName)) {
+    return projectIdOrName;
+  }
+
+  const coreApi = await connection.getCoreApi();
+  const project = await coreApi.getProject(projectIdOrName);
+
+  if (!project?.id) {
+    throw new AzureDevOpsResourceNotFoundError(
+      `Project '${projectIdOrName}' not found`,
+    );
+  }
+
+  return project.id;
+};
 
 const gitStatusStateMap = GitStatusState as unknown as Record<number, string>;
 const policyStatusMap = PolicyEvaluationStatus as unknown as Record<
