@@ -209,6 +209,7 @@ The Azure DevOps MCP server provides a variety of tools for interacting with Azu
 - [`get_pull_request_comments`](https://github.com/hmaldonadovilla/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#get_pull_request_comments) - Get comments from a pull request
 - [`update_pull_request`](https://github.com/hmaldonadovilla/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#update_pull_request) - Update an existing pull request (title, description, status, draft state, reviewers, work items)
 - [`get_pull_request_changes`](https://github.com/hmaldonadovilla/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#get_pull_request_changes) - List changes in a pull request and policy evaluation status
+- [`get_pull_request_checks`](https://github.com/hmaldonadovilla/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#get_pull_request_checks) - Summarize status checks, policy evaluations, and their related pipelines
 
 For comprehensive documentation on all tools, see the [Tools Documentation](https://github.com/hmaldonadovilla/mcp-server-azure-devops/tree/main/docs/tools).
 

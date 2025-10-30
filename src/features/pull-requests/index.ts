@@ -6,6 +6,7 @@ export * from './get-pull-request-comments';
 export * from './add-pull-request-comment';
 export * from './update-pull-request';
 export * from './get-pull-request-changes';
+export * from './get-pull-request-checks';
 
 // Export tool definitions
 export * from './tool-definitions';
@@ -25,12 +26,14 @@ import {
   AddPullRequestCommentSchema,
   UpdatePullRequestSchema,
   GetPullRequestChangesSchema,
+  GetPullRequestChecksSchema,
   createPullRequest,
   listPullRequests,
   getPullRequestComments,
   addPullRequestComment,
   updatePullRequest,
   getPullRequestChanges,
+  getPullRequestChecks,
 } from './';
 
 /**
@@ -47,6 +50,7 @@ export const isPullRequestsRequest: RequestIdentifier = (
     'add_pull_request_comment',
     'update_pull_request',
     'get_pull_request_changes',
+    'get_pull_request_checks',
   ].includes(toolName);
 };
 
@@ -155,6 +159,17 @@ export const handlePullRequestsRequest: RequestHandler = async (
         request.params.arguments,
       );
       const result = await getPullRequestChanges(connection, {
+        projectId: params.projectId ?? defaultProject,
+        repositoryId: params.repositoryId,
+        pullRequestId: params.pullRequestId,
+      });
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+    case 'get_pull_request_checks': {
+      const params = GetPullRequestChecksSchema.parse(request.params.arguments);
+      const result = await getPullRequestChecks(connection, {
         projectId: params.projectId ?? defaultProject,
         repositoryId: params.repositoryId,
         pullRequestId: params.pullRequestId,

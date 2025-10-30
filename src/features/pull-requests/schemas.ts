@@ -248,6 +248,22 @@ export const GetPullRequestChangesSchema = z.object({
   pullRequestId: z.number().describe('The ID of the pull request'),
 });
 
+/**
+ * Schema for retrieving pull request status checks and policy evaluations
+ */
+export const GetPullRequestChecksSchema = z.object({
+  projectId: z
+    .string()
+    .optional()
+    .describe(`The ID or name of the project (Default: ${defaultProject})`),
+  organizationId: z
+    .string()
+    .optional()
+    .describe(`The ID or name of the organization (Default: ${defaultOrg})`),
+  repositoryId: z.string().describe('The ID or name of the repository'),
+  pullRequestId: z.number().describe('The ID of the pull request'),
+});
+
 export const PullRequestFileChangeSchema = z.object({
   path: z.string().describe('Path of the changed file'),
   patch: z.string().describe('Unified diff of the file'),
