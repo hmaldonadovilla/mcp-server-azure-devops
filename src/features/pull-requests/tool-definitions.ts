@@ -7,6 +7,7 @@ import {
   AddPullRequestCommentSchema,
   UpdatePullRequestSchema,
   GetPullRequestChangesSchema,
+  GetPullRequestChecksSchema,
 } from './schemas';
 
 /**
@@ -46,5 +47,14 @@ export const pullRequestsTools: ToolDefinition[] = [
     description:
       'Get the files changed in a pull request, their unified diffs, and the status of policy evaluations',
     inputSchema: zodToJsonSchema(GetPullRequestChangesSchema),
+  },
+  {
+    name: 'get_pull_request_checks',
+    description: [
+      'Summarize the latest status checks and policy evaluations for a pull request.',
+      '- Surfaces pipeline and run identifiers so you can jump straight to the blocking validation.',
+      '- Pair with pipeline tools (e.g., get_pipeline_run, pipeline_timeline) to inspect failures in depth.',
+    ].join('\n'),
+    inputSchema: zodToJsonSchema(GetPullRequestChecksSchema),
   },
 ];

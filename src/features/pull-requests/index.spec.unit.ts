@@ -7,6 +7,7 @@ import { getPullRequestComments } from './get-pull-request-comments';
 import { addPullRequestComment } from './add-pull-request-comment';
 import { AddPullRequestCommentSchema } from './schemas';
 import { getPullRequestChanges } from './get-pull-request-changes';
+import { getPullRequestChecks } from './get-pull-request-checks';
 
 // Mock the imported modules
 jest.mock('./create-pull-request', () => ({
@@ -29,6 +30,10 @@ jest.mock('./get-pull-request-changes', () => ({
   getPullRequestChanges: jest.fn(),
 }));
 
+jest.mock('./get-pull-request-checks', () => ({
+  getPullRequestChecks: jest.fn(),
+}));
+
 describe('Pull Requests Request Handlers', () => {
   const mockConnection = {} as WebApi;
 
@@ -40,6 +45,7 @@ describe('Pull Requests Request Handlers', () => {
         'get_pull_request_comments',
         'add_pull_request_comment',
         'get_pull_request_changes',
+        'get_pull_request_checks',
       ];
       validTools.forEach((tool) => {
         const request = {
@@ -241,6 +247,32 @@ describe('Pull Requests Request Handlers', () => {
         mockResult,
       );
       expect(getPullRequestChanges).toHaveBeenCalled();
+    });
+
+    it('should handle get_pull_request_checks request', async () => {
+      const mockResult = { statuses: [], policyEvaluations: [] };
+      (getPullRequestChecks as jest.Mock).mockResolvedValue(mockResult);
+
+      const request = {
+        params: {
+          name: 'get_pull_request_checks',
+          arguments: { repositoryId: 'test-repo', pullRequestId: 7 },
+        },
+        method: 'tools/call',
+      } as CallToolRequest;
+
+      const response = await handlePullRequestsRequest(mockConnection, request);
+
+      expect(JSON.parse(response.content[0].text as string)).toEqual(
+        mockResult,
+      );
+      expect(getPullRequestChecks).toHaveBeenCalledWith(
+        mockConnection,
+        expect.objectContaining({
+          repositoryId: 'test-repo',
+          pullRequestId: 7,
+        }),
+      );
     });
 
     it('should throw error for unknown tool', async () => {
