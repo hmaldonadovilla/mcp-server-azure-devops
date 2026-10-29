@@ -1,4 +1,4 @@
-import { zodToJsonSchema } from 'zod-to-json-schema';
+import { zodToJsonSchema } from '../../shared/schema';
 import { ToolDefinition } from '../../shared/types/tool-definition';
 import { GetMeSchema } from './schemas';
 

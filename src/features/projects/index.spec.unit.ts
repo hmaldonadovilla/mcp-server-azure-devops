@@ -1,3 +1,4 @@
+import { contentText } from '../../shared/__test__/content-text';
 import { WebApi } from 'azure-devops-node-api';
 import { CallToolRequest } from '@modelcontextprotocol/sdk/types.js';
 import { isProjectsRequest, handleProjectsRequest } from './index';
@@ -67,7 +68,7 @@ describe('Projects Request Handlers', () => {
 
       const response = await handleProjectsRequest(mockConnection, request);
       expect(response.content).toHaveLength(1);
-      expect(JSON.parse(response.content[0].text as string)).toEqual(
+      expect(JSON.parse(contentText(response.content[0]) as string)).toEqual(
         mockProjects,
       );
       expect(listProjects).toHaveBeenCalledWith(
@@ -94,7 +95,7 @@ describe('Projects Request Handlers', () => {
 
       const response = await handleProjectsRequest(mockConnection, request);
       expect(response.content).toHaveLength(1);
-      expect(JSON.parse(response.content[0].text as string)).toEqual(
+      expect(JSON.parse(contentText(response.content[0]) as string)).toEqual(
         mockProject,
       );
       expect(getProject).toHaveBeenCalledWith(mockConnection, 'Project 1');
@@ -122,7 +123,7 @@ describe('Projects Request Handlers', () => {
 
       const response = await handleProjectsRequest(mockConnection, request);
       expect(response.content).toHaveLength(1);
-      expect(JSON.parse(response.content[0].text as string)).toEqual(
+      expect(JSON.parse(contentText(response.content[0]) as string)).toEqual(
         mockProjectDetails,
       );
       expect(getProjectDetails).toHaveBeenCalledWith(

@@ -1,4 +1,4 @@
-import { zodToJsonSchema } from 'zod-to-json-schema';
+import { zodToJsonSchema } from '../../shared/schema';
 import { ToolDefinition } from '../../shared/types/tool-definition';
 import { GetWikisSchema } from './get-wikis/schema';
 import { GetWikiPageSchema } from './get-wiki-page/schema';
