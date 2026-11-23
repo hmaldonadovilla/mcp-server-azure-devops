@@ -1,3 +1,4 @@
+import { contentText } from '../../shared/__test__/content-text';
 import { WebApi } from 'azure-devops-node-api';
 import { CallToolRequest } from '@modelcontextprotocol/sdk/types.js';
 import { isWikisRequest, handleWikisRequest } from './index';
@@ -93,7 +94,9 @@ describe('Wikis Request Handlers', () => {
 
       const response = await handleWikisRequest(mockConnection, request);
       expect(response.content).toHaveLength(1);
-      expect(JSON.parse(response.content[0].text as string)).toEqual(mockWikis);
+      expect(JSON.parse(contentText(response.content[0]) as string)).toEqual(
+        mockWikis,
+      );
       expect(getWikis).toHaveBeenCalledWith(
         mockConnection,
         expect.objectContaining({
@@ -127,7 +130,9 @@ describe('Wikis Request Handlers', () => {
 
       const response = await handleWikisRequest(mockConnection, request);
       expect(response.content).toHaveLength(1);
-      expect(response.content[0].text as string).toEqual(mockWikiContent);
+      expect(contentText(response.content[0]) as string).toEqual(
+        mockWikiContent,
+      );
       expect(getWikiPage).toHaveBeenCalledWith(
         expect.objectContaining({
           projectId: 'project1',
@@ -163,7 +168,9 @@ describe('Wikis Request Handlers', () => {
 
       const response = await handleWikisRequest(mockConnection, request);
       expect(response.content).toHaveLength(1);
-      expect(JSON.parse(response.content[0].text as string)).toEqual(mockWiki);
+      expect(JSON.parse(contentText(response.content[0]) as string)).toEqual(
+        mockWiki,
+      );
       expect(createWiki).toHaveBeenCalledWith(
         mockConnection,
         expect.objectContaining({
@@ -203,7 +210,7 @@ describe('Wikis Request Handlers', () => {
 
       const response = await handleWikisRequest(mockConnection, request);
       expect(response.content).toHaveLength(1);
-      expect(JSON.parse(response.content[0].text as string)).toEqual(
+      expect(JSON.parse(contentText(response.content[0]) as string)).toEqual(
         mockUpdateResult,
       );
       expect(updateWikiPage).toHaveBeenCalledWith(
